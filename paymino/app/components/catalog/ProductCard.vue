@@ -5,7 +5,7 @@ defineProps<{ product: ProductListItem }>()
 
 <template>
   <article class="card group relative flex flex-col overflow-hidden transition-shadow hover:shadow-[var(--shadow-raised)]">
-    <CatalogProductVisual :image-url="product.imageUrl" :category-slug="product.categorySlug" :brand-name="product.brandName" />
+    <CatalogProductVisual :image-url="product.imageUrl" :provider-slug="product.providerSlug" :category-slug="product.categorySlug" :brand-name="product.brandName" />
     <div class="flex flex-1 flex-col p-4">
       <div class="mb-2 flex flex-wrap items-center gap-1.5">
         <UiBadge>{{ PRODUCT_TYPE[product.type] }}</UiBadge>
@@ -21,9 +21,9 @@ defineProps<{ product: ProductListItem }>()
         <UiPriceTag v-if="product.minPriceToman !== null" :amount="product.minPriceToman" :prefix="product.variantCount > 1 ? 'از' : undefined" />
         <span v-else class="text-sm text-muted">ناموجود</span>
         <span
-          class="relative rounded-lg bg-navy-900 px-3 py-1.5 text-sm font-semibold text-white transition-colors group-hover:bg-accent-600"
-          aria-hidden="true"
-          >خرید</span
+            class="relative rounded-lg bg-navy-900 px-3 py-1.5 text-sm font-semibold text-white transition-colors group-hover:bg-accent-600"
+            aria-hidden="true"
+        >خرید</span
         >
       </div>
     </div>

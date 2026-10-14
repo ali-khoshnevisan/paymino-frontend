@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { LogOut, Menu, Package, Search, ShoppingBag, UserRound, X, LifeBuoy, LayoutDashboard } from 'lucide-vue-next'
+import { LogOut, Menu, Package, Search, ShoppingBag, UserRound, X, LifeBuoy, LayoutDashboard, ShieldCheck } from 'lucide-vue-next'
 
 const auth = useAuthStore()
 const cart = useCartStore()
@@ -128,6 +128,9 @@ const firstName = computed(() => auth.user?.fullName.split(' ')[0] ?? '')
               </NuxtLink>
               <NuxtLink role="menuitem" to="/account/support" class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm hover:bg-navy-50">
                 <LifeBuoy class="size-4 text-navy-500" aria-hidden="true" /> پشتیبانی
+              </NuxtLink>
+              <NuxtLink v-if="auth.user?.isStaff" role="menuitem" to="/admin" class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-semibold text-accent-700 hover:bg-accent-50">
+                <ShieldCheck class="size-4" aria-hidden="true" /> پنل مدیریت
               </NuxtLink>
               <button role="menuitem" type="button" class="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-red-700 hover:bg-red-50" @click="logout">
                 <LogOut class="size-4" aria-hidden="true" /> خروج
