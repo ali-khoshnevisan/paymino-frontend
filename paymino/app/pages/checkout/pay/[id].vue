@@ -182,7 +182,7 @@ async function cancelOrder() {
         <UiAlert v-if="cancelError" tone="danger" class="mt-3">{{ cancelError }}</UiAlert>
       </template>
 
-      <PaymentDevPaymentSimulator v-if="isDev && (invoice?.sandbox ?? true) && !isCancelled" class="mt-8" :order-id="order.id" @updated="onUpdated" />
+      <PaymentDevPaymentSimulator v-if="isDev && invoice?.sandbox && !isCancelled" class="mt-8" :order-id="order.id" @updated="onUpdated" />
     </template>
   </div>
 </template>

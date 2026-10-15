@@ -13,11 +13,12 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
-    // Server-only settings (never exposed to the browser).
-    // When the Django backend is ready, the browser talks to it directly via apiBase.
+    // Server-only: optional internal Django URL for SSR requests (e.g. http://127.0.0.1:8001/api).
+    // Empty = SSR uses the public apiBase too.
+    apiBaseServer: '',
     public: {
-      // Default: the bundled mock API under /api. Point to Django later, e.g. https://api.paymino.ir/api
-      apiBase: process.env.NUXT_PUBLIC_API_BASE || '/api',
+      // Django REST API. Production: https://api.paymino.ir/api (set NUXT_PUBLIC_API_BASE)
+      apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:8000/api',
       siteUrl: process.env.NUXT_PUBLIC_SITE_URL || 'http://localhost:3000',
     },
   },

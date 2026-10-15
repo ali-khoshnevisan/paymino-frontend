@@ -13,20 +13,20 @@ const accountRef = ref<HTMLElement>()
 const bump = ref(false)
 
 watch(
-  () => route.fullPath,
-  () => {
-    mobileMenu.value = false
-    mobileSearch.value = false
-    accountMenu.value = false
-  },
+    () => route.fullPath,
+    () => {
+      mobileMenu.value = false
+      mobileSearch.value = false
+      accountMenu.value = false
+    },
 )
 
 watch(
-  () => cart.lastAddedAt,
-  () => {
-    bump.value = true
-    setTimeout(() => (bump.value = false), 400)
-  },
+    () => cart.lastAddedAt,
+    () => {
+      bump.value = true
+      setTimeout(() => (bump.value = false), 400)
+    },
 )
 
 function onDocClick(e: MouseEvent) {
@@ -68,12 +68,12 @@ const firstName = computed(() => auth.user?.fullName.split(' ')[0] ?? '')
 
     <div class="container-page flex h-16 items-center gap-3 lg:h-[72px] lg:gap-6">
       <button
-        type="button"
-        class="-ms-2 flex size-10 items-center justify-center rounded-lg text-navy-800 hover:bg-navy-50 lg:hidden"
-        aria-label="منوی اصلی"
-        :aria-expanded="mobileMenu"
-        aria-controls="mobile-menu"
-        @click="mobileMenu = true"
+          type="button"
+          class="-ms-2 flex size-10 items-center justify-center rounded-lg text-navy-800 hover:bg-navy-50 lg:hidden"
+          aria-label="منوی اصلی"
+          :aria-expanded="mobileMenu"
+          aria-controls="mobile-menu"
+          @click="mobileMenu = true"
       >
         <Menu class="size-6" aria-hidden="true" />
       </button>
@@ -88,11 +88,11 @@ const firstName = computed(() => auth.user?.fullName.split(' ')[0] ?? '')
 
       <div class="ms-auto flex items-center gap-1 lg:ms-0 lg:gap-2">
         <button
-          type="button"
-          class="flex size-10 items-center justify-center rounded-lg text-navy-800 hover:bg-navy-50 lg:hidden"
-          aria-label="جست‌وجو"
-          :aria-expanded="mobileSearch"
-          @click="mobileSearch = !mobileSearch"
+            type="button"
+            class="flex size-10 items-center justify-center rounded-lg text-navy-800 hover:bg-navy-50 lg:hidden"
+            aria-label="جست‌وجو"
+            :aria-expanded="mobileSearch"
+            @click="mobileSearch = !mobileSearch"
         >
           <Search class="size-5" aria-hidden="true" />
         </button>
@@ -100,20 +100,20 @@ const firstName = computed(() => auth.user?.fullName.split(' ')[0] ?? '')
         <!-- Account -->
         <div v-if="auth.isLoggedIn" ref="accountRef" class="relative">
           <button
-            type="button"
-            class="flex h-10 items-center gap-2 rounded-lg px-2 text-sm font-medium text-navy-800 hover:bg-navy-50 sm:px-3"
-            :aria-expanded="accountMenu"
-            aria-haspopup="menu"
-            @click.stop="accountMenu = !accountMenu"
+              type="button"
+              class="flex h-10 items-center gap-2 rounded-lg px-2 text-sm font-medium text-navy-800 hover:bg-navy-50 sm:px-3"
+              :aria-expanded="accountMenu"
+              aria-haspopup="menu"
+              @click.stop="accountMenu = !accountMenu"
           >
             <UserRound class="size-5" aria-hidden="true" />
             <span class="hidden max-w-28 truncate sm:inline">{{ firstName }}</span>
           </button>
           <Transition
-            enter-active-class="transition duration-150 ease-out"
-            enter-from-class="opacity-0 -translate-y-1"
-            leave-active-class="transition duration-100 ease-in"
-            leave-to-class="opacity-0"
+              enter-active-class="transition duration-150 ease-out"
+              enter-from-class="opacity-0 -translate-y-1"
+              leave-active-class="transition duration-100 ease-in"
+              leave-to-class="opacity-0"
           >
             <div v-if="accountMenu" role="menu" class="card absolute end-0 top-12 w-56 overflow-hidden p-1.5 shadow-[var(--shadow-raised)]">
               <div class="border-b border-line px-3 py-2.5">
@@ -139,9 +139,9 @@ const firstName = computed(() => auth.user?.fullName.split(' ')[0] ?? '')
           </Transition>
         </div>
         <NuxtLink
-          v-else
-          :to="{ path: '/auth/login', query: route.path.startsWith('/auth') ? {} : { redirect: route.fullPath } }"
-          class="flex h-10 items-center gap-2 rounded-lg px-2 text-sm font-medium text-navy-800 hover:bg-navy-50 sm:px-3"
+            v-else
+            :to="{ path: '/auth/login', query: route.path.startsWith('/auth') ? {} : { redirect: route.fullPath } }"
+            class="flex h-10 items-center gap-2 rounded-lg px-2 text-sm font-medium text-navy-800 hover:bg-navy-50 sm:px-3"
         >
           <UserRound class="size-5" aria-hidden="true" />
           <span class="hidden sm:inline">ورود / ثبت‌نام</span>
@@ -149,18 +149,18 @@ const firstName = computed(() => auth.user?.fullName.split(' ')[0] ?? '')
 
         <!-- Cart -->
         <NuxtLink
-          to="/cart"
-          class="relative flex h-10 items-center gap-2 rounded-lg px-2 text-sm font-medium text-navy-800 hover:bg-navy-50 sm:px-3"
-          :aria-label="`سبد خرید، ${faNumber(cart.count)} مورد`"
+            to="/cart"
+            class="relative flex h-10 items-center gap-2 rounded-lg px-2 text-sm font-medium text-navy-800 hover:bg-navy-50 sm:px-3"
+            :aria-label="`سبد خرید، ${faNumber(cart.count)} مورد`"
         >
           <ShoppingBag class="size-5" aria-hidden="true" />
           <span class="hidden sm:inline">سبد خرید</span>
           <ClientOnly>
             <span
-              v-if="cart.count > 0"
-              class="tabular absolute -top-0.5 start-6 flex h-5 min-w-5 items-center justify-center rounded-full bg-accent-600 px-1 text-[11px] font-bold text-white ring-2 ring-white transition-transform sm:static sm:ring-0"
-              :class="bump ? 'scale-125' : 'scale-100'"
-              aria-hidden="true"
+                v-if="cart.count > 0"
+                class="tabular absolute -top-0.5 start-6 flex h-5 min-w-5 items-center justify-center rounded-full bg-accent-600 px-1 text-[11px] font-bold text-white ring-2 ring-white transition-transform sm:static sm:ring-0"
+                :class="bump ? 'scale-125' : 'scale-100'"
+                aria-hidden="true"
             >
               {{ faNumber(cart.count) }}
             </span>
@@ -202,18 +202,18 @@ const firstName = computed(() => auth.user?.fullName.split(' ')[0] ?? '')
         <div v-if="mobileMenu" class="fixed inset-0 z-50 bg-navy-950/40 lg:hidden" aria-hidden="true" @click="mobileMenu = false" />
       </Transition>
       <Transition
-        enter-active-class="transition-transform duration-200 ease-out"
-        enter-from-class="translate-x-full"
-        leave-active-class="transition-transform duration-150 ease-in"
-        leave-to-class="translate-x-full"
+          enter-active-class="transition-transform duration-200 ease-out"
+          enter-from-class="translate-x-full"
+          leave-active-class="transition-transform duration-150 ease-in"
+          leave-to-class="translate-x-full"
       >
         <aside
-          v-if="mobileMenu"
-          id="mobile-menu"
-          class="fixed inset-y-0 start-0 z-50 flex w-[86%] max-w-sm flex-col bg-white shadow-xl lg:hidden"
-          role="dialog"
-          aria-modal="true"
-          aria-label="منوی اصلی"
+            v-if="mobileMenu"
+            id="mobile-menu"
+            class="fixed inset-y-0 start-0 z-50 flex w-[86%] max-w-sm flex-col bg-white shadow-xl lg:hidden"
+            role="dialog"
+            aria-modal="true"
+            aria-label="منوی اصلی"
         >
           <div class="flex h-16 items-center justify-between border-b border-line px-4">
             <BrandLogo />

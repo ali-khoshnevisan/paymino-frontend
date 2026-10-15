@@ -1,21 +1,49 @@
+import axios, { type Method } from 'axios'
 import type { ApiErrorBody } from '#shared/types'
 
+export interface ApiRequestOptions {
+  method?: Method
+  body?: unknown
+  query?: Record<string, unknown>
+  headers?: Record<string, string>
+}
+
 /**
- * Typed fetch client for the Paymino API (mock today, Django REST later).
+ * Axios client for the Paymino Django REST API.
  * - Sends cookies (session auth); forwards the browser cookie during SSR.
- * - Never retries mutations automatically.
+ * - During SSR, uses the internal apiBaseServer when configured.
+ * - Never retries requests automatically.
+ *
+ * Usage: `const api = useApi(); const user = await api<User>('/auth/me')`
+ *        `await api('/orders', { method: 'POST', body, headers: { 'Idempotency-Key': key } })`
  */
 export function useApi() {
   const config = useRuntimeConfig()
-  const headers: Record<string, string> = import.meta.server ? (useRequestHeaders(['cookie']) as Record<string, string>) : {}
+  // Resolve to a plain string so this doesn't depend on Nuxt's generated runtime-config types
+  const serverBase = String((config as { apiBaseServer?: unknown }).apiBaseServer ?? '')
+  const publicBase = String(config.public.apiBase ?? '')
+  const baseURL: string = import.meta.server && serverBase ? serverBase : publicBase
 
-  return $fetch.create({
-    baseURL: config.public.apiBase,
-    credentials: 'include',
-    headers,
-    retry: 0,
+  const client = axios.create({
+    baseURL,
+    withCredentials: true,
     timeout: 20000,
+    headers: {
+      Accept: 'application/json',
+      ...(import.meta.server ? (useRequestHeaders(['cookie']) as Record<string, string>) : {}),
+    },
   })
+
+  return async function api<T = unknown>(url: string, opts: ApiRequestOptions = {}): Promise<T> {
+    const res = await client.request<T>({
+      url,
+      method: opts.method ?? 'GET',
+      data: opts.body,
+      params: opts.query,
+      headers: opts.headers,
+    })
+    return res.data
+  }
 }
 
 export interface NormalizedApiError {
@@ -26,11 +54,11 @@ export interface NormalizedApiError {
   data: Record<string, unknown> | null
 }
 
-/** Normalize Nuxt mock errors and DRF errors ({detail} or {field: [msg]}) into one shape. */
+/** Normalize axios errors with DRF bodies ({detail}, {errors: {field: [msg]}} or {field: [msg]}) into one shape. */
 export function normalizeApiError(err: unknown, fallback = 'خطایی رخ داد. لطفاً دوباره تلاش کنید.'): NormalizedApiError {
-  const e = err as { statusCode?: number; status?: number; data?: unknown; response?: { status?: number } }
-  const status = e?.statusCode ?? e?.status ?? e?.response?.status ?? 0
-  const raw = (e?.data as { data?: unknown })?.data ?? e?.data
+  const e = err as { response?: { status?: number; data?: unknown } }
+  const status = e?.response?.status ?? 0 // 0 = network error / timeout
+  const raw = e?.response?.data
   const body = (raw && typeof raw === 'object' ? raw : {}) as ApiErrorBody & Record<string, unknown>
 
   const fieldErrors: Record<string, string> = {}

@@ -36,9 +36,9 @@ async function logout() {
     <div v-if="open" class="fixed inset-0 z-40 bg-navy-950/40 lg:hidden" aria-hidden="true" @click="open = false" />
 
     <aside
-      class="fixed inset-y-0 start-0 z-50 flex w-64 flex-col bg-navy-950 text-navy-100 transition-transform lg:translate-x-0"
-      :class="open ? 'translate-x-0' : 'translate-x-full'"
-      aria-label="منوی مدیریت"
+        class="fixed inset-y-0 start-0 z-50 flex w-64 flex-col bg-navy-950 text-navy-100 transition-transform lg:translate-x-0"
+        :class="open ? 'translate-x-0' : 'translate-x-full'"
+        aria-label="منوی مدیریت"
     >
       <div class="flex h-16 items-center justify-between px-5">
         <NuxtLink to="/admin" class="flex items-center gap-2 text-white">
@@ -51,12 +51,12 @@ async function logout() {
       <p class="px-5 pb-3 text-xs font-semibold tracking-wide text-navy-300">پنل مدیریت</p>
       <nav class="flex-1 space-y-0.5 overflow-y-auto px-3">
         <NuxtLink
-          v-for="l in links"
-          :key="l.to"
-          :to="l.to"
-          class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors"
-          :class="isActive(l) ? 'bg-white/10 text-white' : 'text-navy-200 hover:bg-white/5 hover:text-white'"
-          :aria-current="isActive(l) ? 'page' : undefined"
+            v-for="l in links"
+            :key="l.to"
+            :to="l.to"
+            class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors"
+            :class="isActive(l) ? 'bg-white/10 text-white' : 'text-navy-200 hover:bg-white/5 hover:text-white'"
+            :aria-current="isActive(l) ? 'page' : undefined"
         >
           <component :is="l.icon" class="size-[18px]" aria-hidden="true" />
           {{ l.label }}

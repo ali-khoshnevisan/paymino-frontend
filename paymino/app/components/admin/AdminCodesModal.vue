@@ -71,14 +71,14 @@ const tabs: Array<{ key: GiftCodeStatus; label: string }> = [
     <div class="mt-6 flex items-center justify-between gap-2 border-b border-line">
       <div class="flex gap-1" role="tablist">
         <button
-          v-for="t in tabs"
-          :key="t.key"
-          type="button"
-          role="tab"
-          :aria-selected="tab === t.key"
-          class="-mb-px border-b-2 px-3 py-2 text-sm font-semibold"
-          :class="tab === t.key ? 'border-accent-600' : 'border-transparent text-muted'"
-          @click="tab = t.key"
+            v-for="t in tabs"
+            :key="t.key"
+            type="button"
+            role="tab"
+            :aria-selected="tab === t.key"
+            class="-mb-px border-b-2 px-3 py-2 text-sm font-semibold"
+            :class="tab === t.key ? 'border-accent-600' : 'border-transparent text-muted'"
+            @click="tab = t.key"
         >
           {{ t.label }} <span class="text-xs text-muted">({{ faNumber(data?.summary[t.key] ?? 0) }})</span>
         </button>

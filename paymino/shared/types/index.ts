@@ -1,7 +1,3 @@
-// Shared API contract between the Nuxt frontend and the (future) Django REST backend.
-// The mock API in /server implements exactly these shapes, so switching to DRF
-// only means pointing NUXT_PUBLIC_API_BASE at Django.
-
 export type ProductType = 'gift_card' | 'account_recharge' | 'subscription'
 
 export interface Category {
@@ -63,21 +59,21 @@ export interface Product {
 }
 
 export interface ProductListItem
-  extends Pick<
-    Product,
-    | 'id'
-    | 'slug'
-    | 'name'
-    | 'brandName'
-    | 'categorySlug'
-    | 'providerSlug'
-    | 'type'
-    | 'shortDescription'
-    | 'imageUrl'
-    | 'regions'
-    | 'available'
-    | 'createdAt'
-  > {
+    extends Pick<
+        Product,
+        | 'id'
+        | 'slug'
+        | 'name'
+        | 'brandName'
+        | 'categorySlug'
+        | 'providerSlug'
+        | 'type'
+        | 'shortDescription'
+        | 'imageUrl'
+        | 'regions'
+        | 'available'
+        | 'createdAt'
+    > {
   minPriceToman: number | null
   variantCount: number
   durations: number[]
@@ -156,6 +152,7 @@ export interface User {
   email: string
   phone: string | null
   emailVerified: boolean
+  isStaff?: boolean // true for admin-panel users (Django backend only)
   createdAt: string
 }
 
@@ -178,14 +175,14 @@ export interface CryptoCurrency {
 }
 
 export type PaymentStatus =
-  | 'awaiting_payment'
-  | 'detected'
-  | 'confirming'
-  | 'confirmed'
-  | 'expired'
-  | 'underpaid'
-  | 'failed'
-  | 'refunded'
+    | 'awaiting_payment'
+    | 'detected'
+    | 'confirming'
+    | 'confirmed'
+    | 'expired'
+    | 'underpaid'
+    | 'failed'
+    | 'refunded'
 
 export interface PaymentInvoice {
   id: string
@@ -207,22 +204,22 @@ export interface PaymentInvoice {
   confirmationsRequired: number
   txHash: string | null
   explorerUrl: string | null
-  sandbox: boolean // true for the mock API — UI must warn the user not to pay
+  sandbox: boolean // true for Django's sandbox gateway — UI must warn the user not to pay
 }
 
 /* --------------------------------- Orders -------------------------------- */
 
 export type OrderStatus =
-  | 'pending_payment'
-  | 'payment_verification'
-  | 'paid'
-  | 'processing'
-  | 'awaiting_customer_info'
-  | 'completed'
-  | 'failed'
-  | 'cancelled'
-  | 'refund_pending'
-  | 'refunded'
+    | 'pending_payment'
+    | 'payment_verification'
+    | 'paid'
+    | 'processing'
+    | 'awaiting_customer_info'
+    | 'completed'
+    | 'failed'
+    | 'cancelled'
+    | 'refund_pending'
+    | 'refunded'
 
 export interface OrderItemDelivery {
   kind: 'code' | 'service_note'

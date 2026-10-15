@@ -13,10 +13,10 @@ const { data: currencies, refresh } = await useAsyncData('admin:currencies', () 
 /* store settings (fee shown as percent) */
 const sf = reactive({ feePercent: '', invoiceTtlMinutes: '', lowStockThreshold: '', supportEmail: '', ordersEnabled: true })
 watch(
-  settings,
-  (s) =>
-    s && Object.assign(sf, { feePercent: String(+(s.serviceFeeRate * 100).toFixed(2)), invoiceTtlMinutes: String(s.invoiceTtlMinutes), lowStockThreshold: String(s.lowStockThreshold), supportEmail: s.supportEmail, ordersEnabled: s.ordersEnabled }),
-  { immediate: true },
+    settings,
+    (s) =>
+        s && Object.assign(sf, { feePercent: String(+(s.serviceFeeRate * 100).toFixed(2)), invoiceTtlMinutes: String(s.invoiceTtlMinutes), lowStockThreshold: String(s.lowStockThreshold), supportEmail: s.supportEmail, ordersEnabled: s.ordersEnabled }),
+    { immediate: true },
 )
 async function saveSettings() {
   const body = {
@@ -51,8 +51,8 @@ function openCur(c: AdminCurrency | null) {
 async function saveCur() {
   const body = { ...cf, decimals: toAsciiDigits(cf.decimals), rateToman: toAsciiDigits(cf.rateToman), sortOrder: toAsciiDigits(cf.sortOrder) }
   const res = editingCur.value
-    ? await run('cur', () => api<{ results: AdminCurrency[] }>(`/admin/currencies/${editingCur.value!.id}`, { method: 'PATCH', body }), 'ارز ذخیره شد.')
-    : await run('cur', () => api<{ results: AdminCurrency[] }>('/admin/currencies', { method: 'POST', body }), 'ارز اضافه شد.')
+      ? await run('cur', () => api<{ results: AdminCurrency[] }>(`/admin/currencies/${editingCur.value!.id}`, { method: 'PATCH', body }), 'ارز ذخیره شد.')
+      : await run('cur', () => api<{ results: AdminCurrency[] }>('/admin/currencies', { method: 'POST', body }), 'ارز اضافه شد.')
   if (res) {
     currencies.value = res
     curOpen.value = false
@@ -82,8 +82,8 @@ function openNet(c: AdminCurrency, n: AdminNetwork | null) {
 async function saveNet() {
   const body = { ...nf, minAmount: toAsciiDigits(nf.minAmount), confirmationsRequired: toAsciiDigits(nf.confirmationsRequired) }
   const res = editingNet.value
-    ? await run('net', () => api<{ results: AdminCurrency[] }>(`/admin/networks/${editingNet.value!.id}`, { method: 'PATCH', body }), 'شبکه ذخیره شد.')
-    : await run('net', () => api<{ results: AdminCurrency[] }>(`/admin/currencies/${netCurrency.value!.id}/networks`, { method: 'POST', body }), 'شبکه اضافه شد.')
+      ? await run('net', () => api<{ results: AdminCurrency[] }>(`/admin/networks/${editingNet.value!.id}`, { method: 'PATCH', body }), 'شبکه ذخیره شد.')
+      : await run('net', () => api<{ results: AdminCurrency[] }>(`/admin/currencies/${netCurrency.value!.id}/networks`, { method: 'POST', body }), 'شبکه اضافه شد.')
   if (res) {
     currencies.value = res
     netOpen.value = false

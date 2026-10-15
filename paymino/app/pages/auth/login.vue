@@ -4,7 +4,6 @@ useSeoMeta({ title: 'ورود', robots: 'noindex' })
 
 const auth = useAuthStore()
 const route = useRoute()
-const isDev = import.meta.dev
 
 const form = reactive({ identifier: '', password: '' })
 const errors = ref<Record<string, string>>({})
@@ -70,8 +69,5 @@ async function submit() {
       </NuxtLink>
     </p>
 
-    <p v-if="isDev" class="mt-6 rounded-lg bg-violet-50 p-3 text-xs leading-6 text-violet-900">
-      حساب آزمایشی (فقط حالت توسعه): <span class="ltr font-mono">demo@paymino.test / Demo1234</span>
-    </p>
   </div>
 </template>

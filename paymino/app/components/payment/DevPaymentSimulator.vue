@@ -2,7 +2,7 @@
 import { FlaskConical } from 'lucide-vue-next'
 import type { Order } from '#shared/types'
 
-// DEVELOPMENT ONLY: drives the mock gateway through signed webhooks so every payment state can be tested.
+// DEVELOPMENT ONLY: drives Django's sandbox gateway (DEBUG + PAYMENT_PROVIDER=sandbox) through signed events.
 const props = defineProps<{ orderId: string }>()
 const emit = defineEmits<{ updated: [order: Order] }>()
 const busy = ref<string | null>(null)
