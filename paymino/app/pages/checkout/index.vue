@@ -148,6 +148,7 @@ async function placeOrder() {
         currency: currency.value.code,
         network: network.value.code,
         acceptedTerms: true,
+        couponCode: cart.couponCode || undefined,
         expectedTotalToman: cart.quote.totalToman,
       },
     })
@@ -159,6 +160,14 @@ async function placeOrder() {
       await auth.fetchUser()
       submitError.value = 'نشست شما منقضی شده است. دوباره وارد شوید.'
       return go(2)
+    }
+    if (e.code === 'coupon_invalid') {
+      // The code stopped applying (used up, expired…): show the new total here and let the user decide
+      cart.quote = (e.data?.quote as Quote) ?? null
+      cart.syncCoupon(cart.quote)
+      idempotencyKey.value = uid()
+      submitError.value = `${e.message} مبلغ نهایی بدون این کد به‌روز شد.`
+      return
     }
     if (e.code === 'quote_changed') {
       cart.quote = (e.data?.quote as Quote) ?? null
@@ -377,6 +386,8 @@ async function placeOrder() {
                   </li>
                 </ul>
               </div>
+
+              <CartCouponField />
 
               <UiCheckbox v-model="acceptedTerms" :error="termsError">
                 <NuxtLink to="/terms" target="_blank" class="font-semibold text-accent-700 underline">قوانین و شرایط</NuxtLink>

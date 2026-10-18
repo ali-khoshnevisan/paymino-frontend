@@ -13,6 +13,11 @@ const qty = computed({
 const unavailable = computed(() => props.quoteLine && !props.quoteLine.available)
 const unit = computed(() => props.quoteLine?.unitPriceToman ?? props.line.unitPriceToman)
 const total = computed(() => (unavailable.value ? 0 : unit.value * props.line.quantity))
+// List price before the product's discount; only known once the server quote arrives
+const listUnit = computed(() => {
+  const l = props.quoteLine?.listUnitPriceToman
+  return l && l > unit.value ? l : null
+})
 </script>
 
 <template>
@@ -27,7 +32,8 @@ const total = computed(() => (unavailable.value ? 0 : unit.value * props.line.qu
           <p class="text-sm text-muted">
             <bdi class="ltr font-medium text-navy-700">{{ line.variantLabel }}</bdi>
             <span class="mx-1.5 text-navy-200">|</span>
-            <span class="tabular">{{ formatToman(unit) }}</span>
+            <s v-if="listUnit" class="tabular me-1.5 inline-block text-xs"><span class="sr-only">پیش از تخفیف:</span>{{ faNumber(listUnit) }}</s>
+            <span class="tabular" :class="listUnit ? 'font-semibold text-[#c62a2f]' : ''">{{ formatToman(unit) }}</span>
           </p>
         </div>
         <p class="tabular text-end font-bold">

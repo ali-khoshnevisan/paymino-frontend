@@ -159,3 +159,16 @@
   animation: pm-shimmer 1.4s ease-in-out infinite;
   border-radius: 8px;
 }
+
+/* v-reveal (plugins/reveal.ts): rise 24px and fade in once, on entering the viewport */
+.pm-reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 700ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    transform 700ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.pm-reveal.is-in {
+  opacity: 1;
+  transform: none;
+}

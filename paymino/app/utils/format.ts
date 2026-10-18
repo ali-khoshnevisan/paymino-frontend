@@ -52,3 +52,10 @@ export function uid() {
 export function shortHash(s: string, keep = 8) {
   return s.length > keep * 2 + 3 ? `${s.slice(0, keep)}…${s.slice(-keep)}` : s
 }
+
+/** Preview of the server's discount rounding (catalog/models.py → discounted_price). Server prices are authoritative. */
+export function discountedPrice(price: number, percent: number | null | undefined) {
+  if (!percent) return price
+  const final = Math.round((price * (100 - percent)) / 100 / 1000) * 1000
+  return final > 0 && final < price ? final : price
+}

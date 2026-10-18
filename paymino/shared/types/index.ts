@@ -30,7 +30,8 @@ export interface ProductVariant {
   faceCurrency?: string // USD, EUR, GBP ...
   region?: string // human-readable region
   durationMonths?: number
-  priceToman: number
+  priceToman: number // what the customer pays (after any discount)
+  originalPriceToman?: number // list price, present only when a discount lowers it
   available: boolean
 }
 
@@ -56,6 +57,17 @@ export interface Product {
   variants: ProductVariant[]
   available: boolean
   createdAt: string
+  discountPercent: number | null // active discount, null when none is in force
+  discountEndsAt: string | null
+  article: string // SEO article: blank line = paragraph, "## " = subheading, "- " = list item
+  faqs: ProductFaq[]
+  seoTitle: string | null
+  seoDescription: string | null
+}
+
+export interface ProductFaq {
+  question: string
+  answer: string
 }
 
 export interface ProductListItem
@@ -73,8 +85,11 @@ export interface ProductListItem
         | 'regions'
         | 'available'
         | 'createdAt'
+        | 'discountPercent'
+        | 'discountEndsAt'
     > {
   minPriceToman: number | null
+  minOriginalPriceToman: number | null // list price of the cheapest option, when discounted
   variantCount: number
   durations: number[]
 }
@@ -128,18 +143,31 @@ export interface QuoteLine {
   brandName: string
   variantLabel: string
   quantity: number
-  unitPriceToman: number
+  unitPriceToman: number // after discount
+  listUnitPriceToman?: number // before discount (absent on unknown products)
   lineTotalToman: number
   available: boolean
   issue?: { code: QuoteIssueCode; message: string }
 }
 
+/** Result of checking the discount code sent with a quote. */
+export interface QuoteCoupon {
+  code: string // normalised (upper-case, Latin digits)
+  valid: boolean
+  label?: string // e.g. "10٪ تخفیف", when valid
+  discountToman: number
+  reason?: 'coupon_invalid' | 'coupon_expired' | 'coupon_min_order' | 'coupon_used_up' | 'coupon_used_by_user'
+  message?: string // why it can't be used, when not valid
+}
+
 export interface Quote {
   lines: QuoteLine[]
-  subtotalToman: number
+  subtotalToman: number // at list prices; total = subtotal − discount − couponDiscount + fee
   serviceFeeToman: number
   serviceFeeRate: number
-  discountToman: number
+  discountToman: number // product discounts
+  couponDiscountToman: number
+  coupon: QuoteCoupon | null // null when no code was sent
   totalToman: number
   validUntil: string
 }
@@ -259,6 +287,8 @@ export interface Order {
   subtotalToman: number
   serviceFeeToman: number
   discountToman: number
+  couponCode: string | null
+  couponDiscountToman: number
   totalToman: number
   paymentMethod: { currency: string; network: string } | null
   invoice: PaymentInvoice | null

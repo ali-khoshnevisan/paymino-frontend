@@ -1,5 +1,5 @@
 // Admin panel API contract (Django: /api/admin/*). Staff-only.
-import type { Order, OrderStatus, PaymentInvoice, PaymentStatus, ProductType, RequiredField, TicketStatus } from './index'
+import type { Order, OrderStatus, PaymentInvoice, PaymentStatus, ProductFaq, ProductType, RequiredField, TicketStatus } from './index'
 
 export type StockMode = 'codes' | 'manual'
 export type CategoryIconKey = 'steam' | 'apple' | 'playstation' | 'tradingview' | 'ai'
@@ -109,6 +109,7 @@ export interface AdminProductRow {
     lowStock: boolean
     popularity: number
     createdAt: string
+    discountPercent: number | null // active discount only
 }
 
 export interface AdminProduct {
@@ -136,6 +137,14 @@ export interface AdminProduct {
     isActive: boolean
     createdAt: string
     updatedAt: string
+    discountPercent: number // 0 = no discount
+    discountStartsAt: string | null
+    discountEndsAt: string | null
+    discountActive: boolean // in force right now
+    article: string
+    faqs: ProductFaq[]
+    seoTitle: string
+    seoDescription: string
     variants: AdminVariant[]
 }
 
@@ -219,4 +228,23 @@ export interface AdminCurrency {
     isActive: boolean
     sortOrder: number
     networks: AdminNetwork[]
+}
+export type CouponKind = 'percent' | 'fixed'
+
+export interface AdminCoupon {
+    id: number
+    code: string
+    kind: CouponKind
+    value: number // percent (1–100) or Toman
+    maxDiscountToman: number | null // cap for percent codes
+    minOrderToman: number
+    startsAt: string | null
+    endsAt: string | null
+    usageLimit: number | null // total uses, null = unlimited
+    perUserLimit: number | null // null = unlimited
+    isActive: boolean
+    note: string
+    usedCount: number // orders using it, cancelled ones excluded
+    label: string
+    createdAt: string
 }

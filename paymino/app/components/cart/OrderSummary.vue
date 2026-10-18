@@ -18,13 +18,17 @@ defineEmits<{ retry: [] }>()
         <dt class="text-muted">جمع اقلام</dt>
         <dd class="tabular font-medium">{{ formatToman(quote.subtotalToman) }}</dd>
       </div>
+      <div v-if="quote.discountToman > 0" class="flex justify-between gap-3 text-[#c62a2f]">
+        <dt>تخفیف محصولات</dt>
+        <dd class="tabular font-medium">−{{ formatToman(quote.discountToman) }}</dd>
+      </div>
+      <div v-if="quote.couponDiscountToman > 0" class="flex justify-between gap-3 text-[#c62a2f]">
+        <dt>کد تخفیف <bdi class="ltr font-semibold">{{ quote.coupon?.code }}</bdi></dt>
+        <dd class="tabular font-medium">−{{ formatToman(quote.couponDiscountToman) }}</dd>
+      </div>
       <div class="flex justify-between gap-3">
         <dt class="text-muted">کارمزد خدمات ({{ faNumber(Math.round(quote.serviceFeeRate * 1000) / 10) }}٪)</dt>
         <dd class="tabular font-medium">{{ formatToman(quote.serviceFeeToman) }}</dd>
-      </div>
-      <div v-if="quote.discountToman > 0" class="flex justify-between gap-3 text-accent-700">
-        <dt>تخفیف</dt>
-        <dd class="tabular font-medium">−{{ formatToman(quote.discountToman) }}</dd>
       </div>
       <div class="flex items-center justify-between gap-3 border-t border-line pt-4">
         <dt class="font-bold">مبلغ قابل پرداخت</dt>

@@ -102,13 +102,17 @@ onBeforeUnmount(() => clearInterval(timer))
               <dt class="text-muted">جمع اقلام</dt>
               <dd class="tabular">{{ formatToman(order.subtotalToman) }}</dd>
             </div>
+            <div v-if="order.discountToman" class="flex justify-between gap-3 text-[#c62a2f]">
+              <dt>تخفیف محصولات</dt>
+              <dd class="tabular">−{{ formatToman(order.discountToman) }}</dd>
+            </div>
+            <div v-if="order.couponDiscountToman" class="flex justify-between gap-3 text-[#c62a2f]">
+              <dt>کد تخفیف <bdi class="ltr font-semibold">{{ order.couponCode }}</bdi></dt>
+              <dd class="tabular">−{{ formatToman(order.couponDiscountToman) }}</dd>
+            </div>
             <div class="flex justify-between gap-3">
               <dt class="text-muted">کارمزد خدمات</dt>
               <dd class="tabular">{{ formatToman(order.serviceFeeToman) }}</dd>
-            </div>
-            <div v-if="order.discountToman" class="flex justify-between gap-3">
-              <dt class="text-muted">تخفیف</dt>
-              <dd class="tabular">−{{ formatToman(order.discountToman) }}</dd>
             </div>
             <div class="flex justify-between gap-3 border-t border-line pt-2.5 font-bold">
               <dt>مبلغ کل</dt>

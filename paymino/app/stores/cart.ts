@@ -20,6 +20,8 @@ export interface CartLine {
 }
 
 const STORAGE_KEY = 'paymino.cart.v1'
+// The applied discount code lives for the browser session only (it survives the login redirect during checkout)
+const COUPON_KEY = 'paymino.coupon.v1'
 
 export const useCartStore = defineStore('cart', () => {
   const lines = ref<CartLine[]>([])
@@ -28,6 +30,8 @@ export const useCartStore = defineStore('cart', () => {
   const quoteError = ref<string | null>(null)
   const hydrated = ref(false)
   const lastAddedAt = ref(0)
+  const couponCode = ref('') // applied code; the server re-checks it on every quote and on the order
+  const couponError = ref<string | null>(null)
 
   const count = computed(() => lines.value.reduce((n, l) => n + l.quantity, 0))
   const isEmpty = computed(() => lines.value.length === 0)
@@ -55,8 +59,21 @@ export const useCartStore = defineStore('cart', () => {
     } catch {
       lines.value = []
     }
+    try {
+      couponCode.value = sessionStorage.getItem(COUPON_KEY) ?? ''
+    } catch {
+      couponCode.value = ''
+    }
     hydrated.value = true
     watch(lines, persist, { deep: true })
+    watch(couponCode, (c) => {
+      try {
+        if (c) sessionStorage.setItem(COUPON_KEY, c)
+        else sessionStorage.removeItem(COUPON_KEY)
+      } catch {
+        /* storage unavailable */
+      }
+    })
   }
 
   function add(product: Product, variant: ProductVariant, quantity = 1) {
@@ -108,6 +125,8 @@ export const useCartStore = defineStore('cart', () => {
   function clear() {
     lines.value = []
     quote.value = null
+    couponCode.value = ''
+    couponError.value = null
   }
 
   function toInput() {
@@ -129,7 +148,8 @@ export const useCartStore = defineStore('cart', () => {
     quoteLoading.value = true
     quoteError.value = null
     try {
-      quote.value = await useApi()<Quote>('/cart/quote', { method: 'POST', body: { items: toInput() } })
+      quote.value = await useApi()<Quote>('/cart/quote', { method: 'POST', body: { items: toInput(), couponCode: couponCode.value || undefined } })
+      syncCoupon(quote.value)
       // Apply server-side quantity limits immediately
       for (const ql of quote.value.lines) {
         const line = lines.value.find((l) => l.lineId === ql.lineId)
@@ -142,6 +162,31 @@ export const useCartStore = defineStore('cart', () => {
     } finally {
       quoteLoading.value = false
     }
+  }
+
+  /** Keep the applied code only while the server accepts it; otherwise drop it and say why. */
+  function syncCoupon(q: Quote | null) {
+    if (q?.coupon && !q.coupon.valid) {
+      couponError.value = q.coupon.message ?? 'کد تخفیف معتبر نیست.'
+      couponCode.value = ''
+    } else if (q?.coupon?.valid) {
+      couponCode.value = q.coupon.code
+      couponError.value = null
+    }
+  }
+
+  /** Apply a discount code: the next quote says whether it is valid and what it takes off. */
+  async function applyCoupon(code: string) {
+    couponError.value = null
+    couponCode.value = code.trim()
+    if (!couponCode.value) return null
+    return refreshQuote()
+  }
+
+  function removeCoupon() {
+    couponCode.value = ''
+    couponError.value = null
+    return refreshQuote()
   }
 
   /** User acknowledged changed prices → keep the new server prices as the shown prices. */
@@ -162,6 +207,11 @@ export const useCartStore = defineStore('cart', () => {
     quote,
     quoteLoading,
     quoteError,
+    couponCode,
+    couponError,
+    applyCoupon,
+    removeCoupon,
+    syncCoupon,
     hydrated,
     lastAddedAt,
     count,

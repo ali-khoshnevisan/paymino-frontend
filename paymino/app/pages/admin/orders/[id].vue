@@ -165,6 +165,10 @@ const canDeliver = computed(() => !!order.value && ['processing', 'awaiting_cust
             </ul>
             <div class="space-y-1 border-t border-line bg-canvas/60 px-5 py-3 text-sm">
               <div class="flex justify-between"><span class="text-muted">جمع اقلام</span><span class="tabular">{{ formatToman(order.subtotalToman) }}</span></div>
+              <div v-if="order.discountToman" class="flex justify-between"><span class="text-muted">تخفیف محصولات</span><span class="tabular">−{{ formatToman(order.discountToman) }}</span></div>
+              <div v-if="order.couponDiscountToman" class="flex justify-between">
+                <span class="text-muted">کد تخفیف <bdi class="ltr font-semibold text-navy-800">{{ order.couponCode }}</bdi></span><span class="tabular">−{{ formatToman(order.couponDiscountToman) }}</span>
+              </div>
               <div class="flex justify-between"><span class="text-muted">کارمزد خدمات</span><span class="tabular">{{ formatToman(order.serviceFeeToman) }}</span></div>
               <div class="flex justify-between font-bold"><span>مبلغ کل</span><span class="tabular">{{ formatToman(order.totalToman) }}</span></div>
             </div>

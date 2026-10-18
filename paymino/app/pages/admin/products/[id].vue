@@ -22,11 +22,28 @@ const { data: product, error, refresh } = await useAsyncData(
 useSeoMeta({ title: () => (isNew.value ? 'محصول جدید' : `${product.value?.name ?? 'محصول'} — مدیریت`), robots: 'noindex, nofollow' })
 
 /* --------------------------------- form --------------------------------- */
-type FormState = Omit<AdminProduct, 'id' | 'categoryName' | 'providerName' | 'imageUrl' | 'createdAt' | 'updatedAt' | 'variants' | 'categoryId' | 'providerId' | 'maxQuantityPerItem' | 'popularity'> & {
+type FormState = Omit<
+  AdminProduct,
+  | 'id' | 'categoryName' | 'providerName' | 'imageUrl' | 'createdAt' | 'updatedAt' | 'variants' | 'categoryId' | 'providerId'
+  | 'maxQuantityPerItem' | 'popularity' | 'discountPercent' | 'discountStartsAt' | 'discountEndsAt' | 'discountActive'
+> & {
   categoryId: string
   providerId: string
   maxQuantityPerItem: string
   popularity: string
+  discountPercent: string
+  discountStartsAt: string // <input type="datetime-local"> value, in the admin's local time
+  discountEndsAt: string
+}
+
+// ISO (UTC) ⇄ datetime-local input value (local time, minute precision)
+function toLocalInput(iso: string | null | undefined) {
+  if (!iso) return ''
+  const d = new Date(iso)
+  return new Date(d.getTime() - d.getTimezoneOffset() * 60_000).toISOString().slice(0, 16)
+}
+function fromLocalInput(v: string) {
+  return v ? new Date(v).toISOString() : null
 }
 function toForm(p: AdminProduct | null | undefined): FormState {
   return {
@@ -47,6 +64,13 @@ function toForm(p: AdminProduct | null | undefined): FormState {
     requiredFields: (p?.requiredFields ?? []).map((f) => ({ ...f })),
     maxQuantityPerItem: String(p?.maxQuantityPerItem ?? 5),
     popularity: String(p?.popularity ?? 0),
+    discountPercent: String(p?.discountPercent ?? 0),
+    discountStartsAt: toLocalInput(p?.discountStartsAt),
+    discountEndsAt: toLocalInput(p?.discountEndsAt),
+    article: p?.article ?? '',
+    faqs: (p?.faqs ?? []).map((f) => ({ ...f })),
+    seoTitle: p?.seoTitle ?? '',
+    seoDescription: p?.seoDescription ?? '',
     isActive: p?.isActive ?? false,
   }
 }
@@ -81,6 +105,16 @@ function removeField(i: number) {
   form.requiredFields.splice(i, 1)
 }
 
+function addFaq() {
+  form.faqs.push({ question: '', answer: '' })
+}
+function removeFaq(i: number) {
+  form.faqs.splice(i, 1)
+}
+// What a search result would show when the SEO fields are left empty
+const seoTitlePreview = computed(() => form.seoTitle || form.name || 'عنوان محصول')
+const seoDescriptionPreview = computed(() => form.seoDescription || form.shortDescription || 'توضیح کوتاه محصول')
+
 async function save() {
   const body = {
     ...form,
@@ -88,6 +122,9 @@ async function save() {
     providerId: Number(form.providerId) || null,
     maxQuantityPerItem: toAsciiDigits(form.maxQuantityPerItem),
     popularity: toAsciiDigits(form.popularity),
+    discountPercent: toAsciiDigits(form.discountPercent) || '0',
+    discountStartsAt: fromLocalInput(form.discountStartsAt),
+    discountEndsAt: fromLocalInput(form.discountEndsAt),
   }
   if (isNew.value) {
     const res = await run('save', () => api<AdminProduct>('/admin/products', { method: 'POST', body }), 'محصول ساخته شد. اکنون گزینه‌ها و قیمت‌ها را اضافه کنید.')
@@ -172,9 +209,26 @@ function openCodes(v: AdminVariant) {
 watch(codesOpen, (open) => {
   if (!open) refresh()
 })
+/* -------------------------------- discount -------------------------------- */
+// Percent as typed (for previews); NaN-safe
+const discountPreview = computed(() => {
+  const n = Number(toAsciiDigits(form.discountPercent))
+  return Number.isInteger(n) && n > 0 && n <= 90 ? n : 0
+})
+const discountStatus = computed<{ tone: 'success' | 'warning' | 'neutral'; text: string }>(() => {
+  const p = product.value
+  if (!p || !p.discountPercent) return { tone: 'neutral', text: 'بدون تخفیف' }
+  if (p.discountActive) return { tone: 'success', text: `${faNumber(p.discountPercent)}٪ تخفیف فعال است` }
+  if (p.discountStartsAt && new Date(p.discountStartsAt) > new Date()) return { tone: 'warning', text: `از ${formatDateTime(p.discountStartsAt)} شروع می‌شود` }
+  return { tone: 'neutral', text: 'دوره تخفیف تمام شده است' }
+})
+function clearDiscount() {
+  Object.assign(form, { discountPercent: '0', discountStartsAt: '', discountEndsAt: '' })
+}
+
 const priceHint = computed(() => {
   const n = Number(toAsciiDigits(vf.priceToman).replace(/[,٬\s]/g, ''))
-  return Number.isFinite(n) && n > 0 ? formatToman(n) : 'قیمت نهایی فروش به تومان'
+  return Number.isFinite(n) && n > 0 ? formatToman(n) : 'قیمت فروش به تومان، پیش از تخفیف'
 })
 </script>
 
@@ -237,6 +291,44 @@ const priceHint = computed(() => {
             </div>
           </section>
 
+          <section class="card space-y-5 p-5">
+            <div>
+              <h2 class="font-bold">سئو و معرفی محصول</h2>
+              <p class="text-xs text-muted">مقاله و سؤال‌ها در صفحه محصول نمایش داده می‌شوند و سؤال‌ها برای گوگل هم به‌صورت داده ساخت‌یافته (FAQ) منتشر می‌شوند.</p>
+            </div>
+            <div class="grid gap-4 sm:grid-cols-2">
+              <UiInput v-model="form.seoTitle" label="عنوان سئو (اختیاری)" :maxlength="70" :error="errors.seoTitle" :hint="`${faNumber(form.seoTitle.length)} از ۷۰ — خالی = نام فارسی`" />
+              <UiInput v-model="form.seoDescription" label="توضیح متا (اختیاری)" :maxlength="170" :error="errors.seoDescription" :hint="`${faNumber(form.seoDescription.length)} از ۱۷۰ — خالی = توضیح کوتاه`" />
+            </div>
+            <div class="rounded-[var(--radius-control)] bg-canvas p-4" aria-label="پیش‌نمایش نتیجه جست‌وجو">
+              <p class="truncate text-[17px] font-semibold text-[#1a0dab]">{{ seoTitlePreview }} | پی‌مینو</p>
+              <p class="ltr truncate text-start text-xs text-emerald-800">paymino.ir/p/{{ form.slug || '…' }}</p>
+              <p class="mt-1 line-clamp-2 text-sm text-navy-700">{{ seoDescriptionPreview }}</p>
+            </div>
+            <UiTextarea
+                v-model="form.article"
+                label="مقاله معرفی"
+                :rows="12"
+                :error="errors.article"
+                hint="یک خط خالی = پاراگراف تازه · خط با «## » = زیرعنوان · خط با «- » = آیتم فهرست. خالی = توضیحات کامل نمایش داده می‌شود."
+            />
+            <div>
+              <div class="mb-3 flex items-center justify-between">
+                <h3 class="text-sm font-bold">سؤالات متداول این محصول</h3>
+                <UiButton size="sm" variant="secondary" @click="addFaq"><Plus class="size-4" aria-hidden="true" /> سؤال</UiButton>
+              </div>
+              <p v-if="errors.faqs" class="mb-2 text-sm text-red-700" role="alert">{{ errors.faqs }}</p>
+              <p v-if="!form.faqs.length" class="text-sm text-muted">بدون سؤال؛ صفحه از روی منطقه، روش تحویل و قوانین بازپرداخت چند سؤال می‌سازد.</p>
+              <div v-for="(f, i) in form.faqs" :key="i" class="mb-3 grid gap-3 rounded-[var(--radius-control)] bg-canvas p-3 sm:grid-cols-[1fr_auto]">
+                <UiInput v-model="f.question" :label="`سؤال ${faNumber(i + 1)}`" :maxlength="200" />
+                <div class="flex items-end">
+                  <UiButton variant="ghost" size="sm" class="!h-11 text-red-600" :aria-label="`حذف سؤال ${i + 1}`" @click="removeFaq(i)"><Trash2 class="size-4" aria-hidden="true" /></UiButton>
+                </div>
+                <UiTextarea v-model="f.answer" label="پاسخ" :rows="2" class="sm:col-span-2" />
+              </div>
+            </div>
+          </section>
+
           <!-- Variants -->
           <section v-if="product" id="variants" class="card overflow-hidden">
             <div class="flex items-center justify-between border-b border-line px-5 py-3">
@@ -265,7 +357,13 @@ const priceHint = computed(() => {
                       <p class="ltr font-semibold">{{ v.label }}</p>
                       <p class="text-xs whitespace-nowrap text-muted">{{ v.region }}<template v-if="v.durationMonths"> — {{ durationLabel(v.durationMonths) }}</template></p>
                     </td>
-                    <td class="tabular px-4 py-2.5 whitespace-nowrap">{{ formatToman(v.priceToman) }}</td>
+                    <td class="tabular px-4 py-2.5 whitespace-nowrap">
+                      <template v-if="discountPreview && discountedPrice(v.priceToman, discountPreview) < v.priceToman">
+                        <p class="font-semibold text-accent-700">{{ formatToman(discountedPrice(v.priceToman, discountPreview)) }}</p>
+                        <p class="text-xs text-muted line-through">{{ formatToman(v.priceToman) }}</p>
+                      </template>
+                      <template v-else>{{ formatToman(v.priceToman) }}</template>
+                    </td>
                     <td class="px-4 py-2.5 whitespace-nowrap">{{ v.stockMode === 'codes' ? 'خودکار (کد)' : 'دستی' }}</td>
                     <td class="px-4 py-2.5 whitespace-nowrap">
                       <UiBadge v-if="v.stockMode === 'codes'" :tone="v.stock ? 'accent' : 'danger'">{{ faNumber(v.stock) }} کد</UiBadge>
@@ -298,6 +396,27 @@ const priceHint = computed(() => {
             <UiInput v-model="form.maxQuantityPerItem" label="حداکثر تعداد در هر خرید" inputmode="numeric" ltr :error="errors.maxQuantityPerItem" hint="برای سرویس‌هایی که اطلاعات حساب می‌خواهند: ۱" />
             <UiInput v-model="form.popularity" label="اولویت نمایش (عدد بزرگ‌تر = بالاتر)" inputmode="numeric" ltr :error="errors.popularity" />
             <UiButton type="submit" variant="accent" block :loading="busy === 'save'">{{ isNew ? 'ساخت محصول' : 'ذخیره تغییرات' }}</UiButton>
+          </section>
+
+          <section class="card space-y-4 p-5">
+            <div class="flex items-center justify-between gap-2">
+              <h2 class="font-bold">تخفیف</h2>
+              <UiBadge v-if="!isNew" :tone="discountStatus.tone" dot>{{ discountStatus.text }}</UiBadge>
+            </div>
+            <UiInput
+                v-model="form.discountPercent"
+                label="درصد تخفیف"
+                inputmode="numeric"
+                ltr
+                :error="errors.discountPercent"
+                hint="۰ تا ۹۰. روی همه گزینه‌های این محصول اعمال می‌شود؛ قیمت نهایی به ۱٬۰۰۰ تومان گرد می‌شود."
+            />
+            <UiInput v-model="form.discountStartsAt" type="datetime-local" label="شروع (اختیاری)" ltr :error="errors.discountStartsAt" hint="خالی = از همین حالا" />
+            <UiInput v-model="form.discountEndsAt" type="datetime-local" label="پایان (اختیاری)" ltr :error="errors.discountEndsAt" hint="خالی = تا وقتی آن را بردارید" />
+            <div class="flex items-center justify-between gap-2">
+              <p class="text-xs text-muted">پس از تغییر، «ذخیره تغییرات» را بزنید.</p>
+              <UiButton v-if="form.discountPercent !== '0' || form.discountStartsAt || form.discountEndsAt" size="sm" variant="ghost" class="text-red-600" @click="clearDiscount">حذف تخفیف</UiButton>
+            </div>
           </section>
 
           <section v-if="product" class="card p-5">

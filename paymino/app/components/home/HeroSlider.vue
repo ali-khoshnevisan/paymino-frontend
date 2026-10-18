@@ -1,103 +1,67 @@
 <script setup lang="ts">
-import { ArrowLeft, ChevronLeft, ChevronRight, Gamepad2, MessageCircle, Pause, Play, Sparkles } from 'lucide-vue-next'
-import type { Component } from 'vue'
+import { ArrowLeft, ChevronLeft, ChevronRight, Pause, Play } from 'lucide-vue-next'
 
 /**
- * Homepage hero slider. Slide 1 is the original hero (HomeHeroIntro); the rest are promos
- * in a "3D app tile on a podium" style (HomePromoArt), with real HTML text.
+ * Homepage hero slider. Slide 1 is the original hero (HomeHeroIntro); the rest are image banners
+ * (public/banners, made from the designs in public/brands/*-banner.png) that carry their own text,
+ * with one real button placed under that text.
  * Crossfade (no horizontal track), so RTL needs no special math and height never jumps:
- * all slides share one grid cell and the tallest sets the height.
+ * all slides share one grid cell and the tallest (slide 1) sets the height.
  */
 interface Promo {
   key: string
-  brand: string // Latin brand name, shown large
-  title: string // Persian heading
-  text: string
+  image: string // full-size banner (2011×782)
+  imageSmall: string // 1000px wide, for phones
+  alt: string // the text printed on the banner
+  label: string // for the slide picker
   cta: string
   to: string
-  background: string
-  dark: boolean // true → dark text on a light background
-  art: {
-    logo: string // white/mono official logo for the tile face — see public/brands/README.txt
-    fallbackIcon: Component
-    tileFrom: string
-    tileTo: string
-    tileEdge: string
-    glow: string
-    podiumTop: string
-    podiumSide: string
-    ring: string
-  }
+  background: string // banner edge colour, fills the slide around the image on phones
+  buttonClass: string
 }
+
+// Banner geometry: every banner is 2011×782 and its text block starts ~8.5% from the left,
+// with room for the button under the subtitle at ~64% of the height.
+const BANNER_RATIO = 2011 / 782
 
 const promos: Promo[] = [
   {
-    key: 'claude',
-    brand: 'Claude',
-    title: 'شارژ اکانت',
-    text: 'به قابلیت‌های پیشرفته هوش مصنوعی کلاد دسترسی داشته باش.',
-    cta: 'مشاهده خدمات',
-    to: '/c/ai',
-    background: 'radial-gradient(70% 120% at 20% 40%, #f1a585 0%, transparent 60%), linear-gradient(110deg, #c9603d 0%, #de8160 45%, #e99a7a 100%)',
-    dark: true,
-    art: {
-      logo: '/brands/claude-white.png',
-      fallbackIcon: Sparkles,
-      tileFrom: '#ee9c7b',
-      tileTo: '#cf6542',
-      tileEdge: '#a84a2c',
-      glow: '#ffd2bf',
-      podiumTop: '#f0a382',
-      podiumSide: '#c25a37',
-      ring: '#ffe3d6',
-    },
-  },
-  {
     key: 'chatgpt',
-    brand: 'ChatGPT',
-    title: 'ارتقای اکانت',
-    text: 'اشتراک و خدمات موردنیاز ChatGPT را از پی‌مینو تهیه کن.',
+    image: '/banners/chatgpt.webp',
+    imageSmall: '/banners/chatgpt-1000.webp',
+    alt: 'شارژ اکانت ChatGPT — دسترسی به تمام امکانات و اشتراک‌های ChatGPT Plus و Pro',
+    label: 'شارژ اکانت ChatGPT',
     cta: 'خرید اشتراک',
     to: '/p/chatgpt-plus',
-    background: 'radial-gradient(70% 120% at 20% 40%, #1d8a70 0%, transparent 60%), linear-gradient(110deg, #052b24 0%, #0a4a3d 50%, #0d5a4a 100%)',
-    dark: false,
-    art: {
-      logo: '/brands/openai-white.png',
-      fallbackIcon: MessageCircle,
-      tileFrom: '#2fc79c',
-      tileTo: '#0f7a60',
-      tileEdge: '#0a5544',
-      glow: '#3ee0b0',
-      podiumTop: '#147a63',
-      podiumSide: '#073f33',
-      ring: '#7ff5d2',
-    },
+    background: '#062a31',
+    buttonClass: 'bg-[#10a37f] text-white hover:bg-[#0e8f70] focus-visible:outline-white',
   },
   {
-    key: 'steam',
-    brand: 'Steam',
-    title: 'گیفت کارت',
-    text: 'گیفت کارت استیم متناسب با ریجن اکانتت تهیه کن.',
-    cta: 'مشاهده گیفت کارت‌ها',
-    to: '/c/steam',
-    background: 'radial-gradient(70% 120% at 20% 40%, #1f4f80 0%, transparent 60%), linear-gradient(110deg, #060c16 0%, #0d1d33 50%, #132a47 100%)',
-    dark: false,
-    art: {
-      logo: '/brands/img.png',
-      fallbackIcon: Gamepad2,
-      tileFrom: '#2c5a8c',
-      tileTo: '#112640',
-      tileEdge: '#08162a',
-      glow: '#4aa3e8',
-      podiumTop: '#1d3d63',
-      podiumSide: '#0a1a2e',
-      ring: '#8fd0ff',
-    },
+    key: 'tradingview',
+    image: '/banners/tradingview.webp',
+    imageSmall: '/banners/tradingview-1000.webp',
+    alt: 'شارژ اکانت TradingView — دسترسی به تمام امکانات و ابزارهای تحلیل تریدینگ‌ویو',
+    label: 'شارژ اکانت TradingView',
+    cta: 'خرید اشتراک',
+    to: '/p/tradingview-subscription',
+    background: '#081a3a',
+    buttonClass: 'bg-[#2962ff] text-white hover:bg-[#1e53e5] focus-visible:outline-white',
+  },
+  {
+    key: 'claude',
+    image: '/banners/claude.webp',
+    imageSmall: '/banners/claude-1000.webp',
+    alt: 'شارژ اکانت Claude — دسترسی به تمام امکانات هوش مصنوعی کلاود',
+    label: 'شارژ اکانت Claude',
+    cta: 'مشاهده خدمات',
+    to: '/c/ai',
+    background: '#000000',
+    buttonClass: 'bg-[#2a140c] text-white hover:bg-[#3d1d10] focus-visible:outline-white',
   },
 ]
 
 const total = promos.length + 1
-const labels = ['معرفی پی‌مینو', ...promos.map((p) => `${p.title} ${p.brand}`)]
+const labels = ['معرفی پی‌مینو', ...promos.map((p) => p.label)]
 const AUTOPLAY_MS = 7000
 
 const current = ref(0)
@@ -108,9 +72,12 @@ const userPaused = ref(false)
 const reducedMotion = ref(false)
 
 const autoplayActive = computed(() => !reducedMotion.value && !stopped.value && !userPaused.value)
-const running = computed(() => autoplayActive.value && !hovering.value && !focusWithin.value)
+// Phones show slide 1 alone and the banners as a swipeable row under it (a banner in a slide as tall as slide 1 would be a thin strip)
+const isPhone = ref(false)
+const running = computed(() => autoplayActive.value && !hovering.value && !focusWithin.value && !isPhone.value)
 
 function go(i: number, byUser = true) {
+  if (isPhone.value) return
   current.value = (i + total) % total
   if (byUser) stopped.value = true
 }
@@ -126,7 +93,7 @@ function schedule() {
     else schedule()
   }, AUTOPLAY_MS)
 }
-watch([current, running], schedule)
+watch([current], schedule)
 
 function togglePause() {
   if (autoplayActive.value) userPaused.value = true
@@ -172,7 +139,14 @@ onMounted(() => {
   const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
   reducedMotion.value = mq.matches
   mq.addEventListener('change', (e) => (reducedMotion.value = e.matches))
-  schedule()
+  const phone = window.matchMedia('(max-width: 639px)')
+  const setPhone = (matches: boolean) => {
+    isPhone.value = matches
+    if (matches) current.value = 0
+    schedule()
+  }
+  setPhone(phone.matches)
+  phone.addEventListener('change', (e) => setPhone(e.matches))
 })
 onBeforeUnmount(() => clearTimeout(timer))
 </script>
@@ -209,55 +183,66 @@ onBeforeUnmount(() => clearTimeout(timer))
       <div
           v-for="(p, i) in promos"
           :key="p.key"
-          class="col-start-1 row-start-1 transition-opacity duration-700 ease-out"
+          class="col-start-1 row-start-1 hidden transition-opacity duration-700 ease-out sm:block"
           :class="current === i + 1 ? 'z-10 opacity-100' : 'pointer-events-none z-0 opacity-0'"
           role="group"
           aria-roledescription="slide"
-          :aria-label="`${faNumber(i + 2)} از ${faNumber(total)}: ${p.title} ${p.brand}`"
+          :aria-label="`${faNumber(i + 2)} از ${faNumber(total)}: ${p.label}`"
           :aria-hidden="current !== i + 1"
           :inert="current !== i + 1"
       >
-        <div class="relative h-full overflow-hidden" :style="{ background: p.background }">
-          <!-- soft curves in the background -->
-          <div class="pointer-events-none absolute inset-0 opacity-[0.12]" aria-hidden="true">
-            <div class="absolute -end-[10%] -top-[60%] size-[70rem] rounded-full border-[1.5px]" :class="p.dark ? 'border-white' : 'border-white/70'" />
-            <div class="absolute -end-[5%] -top-[40%] size-[55rem] rounded-full border" :class="p.dark ? 'border-white' : 'border-white/60'" />
-          </div>
-
-          <div class="container-page relative grid h-full items-center gap-2 pt-8 pb-24 lg:grid-cols-[1fr_1fr] lg:gap-10 lg:py-16">
-            <!-- Copy (right side in RTL) -->
-            <div class="order-2 lg:order-1">
-              <h2 class="leading-tight font-extrabold" :class="p.dark ? 'text-[#2a140c]' : 'text-white'">
-                <span class="block text-xl sm:text-2xl lg:text-3xl" :class="p.dark ? 'text-[#5a2814]' : 'text-white/85'">{{ p.title }}</span>
-                <bdi class="ltr mt-1 block text-right text-[44px] tracking-tight sm:text-6xl lg:text-7xl">{{ p.brand }}</bdi>
-              </h2>
-              <p
-                  class="mt-5 max-w-md border-s-[3px] ps-4 text-base leading-8 sm:text-lg"
-                  :class="p.dark ? 'border-[#2a140c]/40 text-[#3d1d10]' : 'border-white/40 text-white/85'"
-              >
-                {{ p.text }}
-              </p>
-              <NuxtLink
-                  :to="p.to"
-                  class="mt-7 inline-flex h-12 items-center gap-2 rounded-[var(--radius-control)] px-6 font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
-                  :class="p.dark ? 'bg-[#2a140c] text-white hover:bg-[#3d1d10] focus-visible:outline-[#2a140c]' : 'bg-white text-navy-900 hover:bg-white/90 focus-visible:outline-white'"
-              >
-                {{ p.cta }}
-                <ArrowLeft class="size-5" aria-hidden="true" />
-              </NuxtLink>
-            </div>
-
-            <!-- 3D tile (left side in RTL; on top on mobile) -->
-            <div class="order-1 flex justify-center text-[9px] sm:text-[11px] lg:order-2 lg:text-[13px]">
-              <HomePromoArt v-bind="p.art" :logo-alt="p.brand" />
-            </div>
+        <!-- The slide is a size container: on sm+ the banner covers it (cropping a little at the edges),
+             on phones the whole banner shows on its own edge colour -->
+        <div class="relative h-full min-h-48 overflow-hidden [container-type:size]" :style="{ background: p.background }">
+          <div class="banner absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" :style="{ '--ratio': BANNER_RATIO }">
+            <picture>
+              <source media="(max-width: 639px)" :srcset="p.imageSmall" />
+              <img
+                  :src="p.image"
+                  :alt="p.alt"
+                  width="2011"
+                  height="782"
+                  :loading="i === 0 ? 'eager' : 'lazy'"
+                  decoding="async"
+                  draggable="false"
+                  class="block size-full select-none"
+              />
+            </picture>
+            <NuxtLink
+                :to="p.to"
+                class="absolute top-[64%] left-[8.5%] inline-flex h-8 items-center gap-1.5 rounded-full px-3.5 text-xs font-bold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 sm:h-11 sm:gap-2 sm:px-6 sm:text-base lg:h-12 lg:px-7"
+                :class="p.buttonClass"
+            >
+              {{ p.cta }}
+              <ArrowLeft class="size-4 sm:size-5" aria-hidden="true" />
+            </NuxtLink>
           </div>
         </div>
       </div>
     </div>
 
+    <!-- Phones: the banners as a swipeable row of cards under slide 1 -->
+    <ul class="flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-6 [scrollbar-width:none] sm:hidden [&::-webkit-scrollbar]:hidden" aria-label="پیشنهادهای ویژه">
+      <li
+          v-for="p in promos"
+          :key="p.key"
+          class="relative w-[88%] shrink-0 snap-center overflow-hidden rounded-2xl"
+          :style="{ background: p.background, aspectRatio: BANNER_RATIO }"
+      >
+        <img :src="p.imageSmall" :alt="p.alt" width="1000" height="389" loading="lazy" decoding="async" draggable="false" class="block size-full select-none" />
+        <NuxtLink
+            :to="p.to"
+            class="absolute top-[64%] left-[8.5%] inline-flex h-7 items-center gap-1 rounded-full px-3 text-[11px] font-bold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
+            :class="p.buttonClass"
+        >
+          {{ p.cta }}
+          <ArrowLeft class="size-3.5" aria-hidden="true" />
+        </NuxtLink>
+      </li>
+    </ul>
+
     <!-- Controls -->
-    <div class="pointer-events-none absolute inset-x-0 bottom-5 z-20 flex justify-center">
+    <div class="pointer-events-none absolute inset-x-0 bottom-5 z-20 hidden justify-center sm:flex">
       <div class="pointer-events-auto flex items-center gap-1.5 rounded-full bg-black/30 p-1.5 ring-1 ring-white/15 backdrop-blur-md">
         <button
             type="button"
@@ -308,3 +293,16 @@ onBeforeUnmount(() => clearTimeout(timer))
     </div>
   </section>
 </template>
+
+<style scoped>
+/* Phones: the banner at full width. sm+: wide enough to cover the slide in both directions. */
+.banner {
+  width: 100cqw;
+  aspect-ratio: var(--ratio);
+}
+@media (min-width: 40rem) {
+  .banner {
+    width: max(100cqw, 100cqh * var(--ratio));
+  }
+}
+</style>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ExternalLink, FolderTree, LayoutDashboard, LifeBuoy, LogOut, Menu, Package, Settings, ShoppingCart, Users, X } from 'lucide-vue-next'
+import { ExternalLink, FolderTree, LayoutDashboard, LifeBuoy, LogOut, Menu, Package, Settings, ShoppingCart, TicketPercent, Users, X } from 'lucide-vue-next'
 
 const auth = useAuthStore()
 const route = useRoute()
@@ -10,6 +10,7 @@ const links = [
   { to: '/admin/orders', label: 'سفارش‌ها', icon: ShoppingCart },
   { to: '/admin/products', label: 'محصولات', icon: Package },
   { to: '/admin/categories', label: 'دسته‌ها و برندها', icon: FolderTree },
+  { to: '/admin/coupons', label: 'کدهای تخفیف', icon: TicketPercent },
   { to: '/admin/users', label: 'کاربران', icon: Users },
   { to: '/admin/tickets', label: 'پشتیبانی', icon: LifeBuoy },
   { to: '/admin/settings', label: 'تنظیمات و نرخ‌ها', icon: Settings },

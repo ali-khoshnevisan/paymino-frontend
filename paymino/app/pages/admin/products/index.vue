@@ -69,6 +69,7 @@ const typeOptions = (Object.keys(PRODUCT_TYPE) as ProductType[]).map((t) => ({ v
             <div class="flex w-28 flex-col items-end gap-1">
               <UiBadge :tone="p.isActive ? 'success' : 'neutral'" dot>{{ p.isActive ? 'منتشرشده' : 'غیرفعال' }}</UiBadge>
               <UiBadge v-if="p.stock !== null" :tone="p.lowStock ? 'danger' : 'accent'">موجودی کد: {{ faNumber(p.stock) }}</UiBadge>
+              <UiBadge v-if="p.discountPercent" tone="warning">{{ faNumber(p.discountPercent) }}٪ تخفیف</UiBadge>
             </div>
           </NuxtLink>
         </li>
