@@ -53,7 +53,11 @@ async function submit() {
     <h1 class="text-2xl font-extrabold">ساخت حساب کاربری</h1>
     <p class="mt-1 text-sm text-muted">برای ثبت سفارش و پیگیری آن حساب بسازید.</p>
 
-    <form class="mt-6 space-y-4" novalidate @submit.prevent="submit">
+    <div class="mt-6">
+      <AuthGoogleButton :redirect="safeRedirect(route.query.redirect)" label="ثبت‌نام با حساب گوگل" terms-note />
+    </div>
+
+    <form class="space-y-4" novalidate @submit.prevent="submit">
       <UiInput v-model="form.fullName" label="نام و نام خانوادگی" autocomplete="name" :error="errors.fullName" required />
       <UiInput v-model="form.email" type="email" label="ایمیل" autocomplete="email" inputmode="email" ltr :error="errors.email" required />
       <UiInput

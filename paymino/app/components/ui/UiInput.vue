@@ -53,8 +53,7 @@ const describedBy = computed(() => [props.error ? `${id}-err` : '', props.hint ?
       <button
         v-if="isPassword"
         type="button"
-        class="absolute inset-y-0 end-0 flex w-11 items-center justify-center rounded-e-[var(--radius-control)] text-navy-400 hover:text-navy-700"
-        :aria-label="showPassword ? 'پنهان کردن رمز عبور' : 'نمایش رمز عبور'"
+        class="absolute left-auto  inset-y-0 end-0 flex w-11 items-center justify-center rounded-e-[var(--radius-control)] text-navy-400 hover:text-navy-700"
         :aria-pressed="showPassword"
         @click="showPassword = !showPassword"
       >

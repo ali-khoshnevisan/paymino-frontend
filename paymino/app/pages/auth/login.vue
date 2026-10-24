@@ -11,6 +11,22 @@ const formError = ref<string | null>(null)
 const loading = ref(false)
 const redirect = computed(() => safeRedirect(route.query.redirect))
 
+// Coming back from a Google sign-in that did not finish (see accounts/google.py on the API)
+const googleErrors: Record<string, string> = {
+  google_cancelled: 'ورود با گوگل لغو شد.',
+  google_expired: 'مهلت ورود با گوگل تمام شد. دوباره امتحان کنید.',
+  google_email_unverified: 'ایمیل این حساب گوگل تأیید نشده است. حساب دیگری را امتحان کنید.',
+  google_conflict: 'این ایمیل به حساب گوگل دیگری متصل است. با ایمیل و رمز عبور وارد شوید.',
+  google_disabled: 'این حساب کاربری غیرفعال شده است. با پشتیبانی تماس بگیرید.',
+  google_unavailable: 'ورود با گوگل در حال حاضر فعال نیست.',
+  google_throttled: 'تعداد تلاش‌ها زیاد بود. چند دقیقه بعد دوباره امتحان کنید.',
+  google_failed: 'ورود با گوگل انجام نشد. دوباره امتحان کنید.',
+}
+const googleError = computed(() => {
+  const code = String(route.query.error ?? '')
+  return code.startsWith('google_') ? (googleErrors[code] ?? googleErrors.google_failed) : null
+})
+
 function validate() {
   const e: Record<string, string> = {}
   if (!form.identifier.trim()) e.identifier = 'ایمیل یا شماره موبایل را وارد کنید.'
@@ -42,7 +58,12 @@ async function submit() {
     <h1 class="text-2xl font-extrabold">ورود به پی‌مینو</h1>
     <p class="mt-1 text-sm text-muted">برای پیگیری سفارش‌ها وارد حساب خود شوید.</p>
 
-    <form class="mt-6 space-y-4" novalidate @submit.prevent="submit">
+    <UiAlert v-if="googleError" tone="danger" class="mt-6">{{ googleError }}</UiAlert>
+    <div class="mt-6">
+      <AuthGoogleButton :redirect="redirect" />
+    </div>
+
+    <form class="space-y-4" novalidate @submit.prevent="submit">
       <UiInput
         v-model="form.identifier"
         label="ایمیل یا شماره موبایل"
